@@ -54,20 +54,26 @@ class MovieLikeView(APIView):
         is_liked = movie.likes.filter(id=request.user.id).exists() 
         return Response({"liked": is_liked}, status=status.HTTP_200_OK)
 
-    def post(self, request, pk):
-        movie = get_object_or_404(Movie, pk=pk)
+    def post(self, request, id):
+        movie = get_object_or_404(Movie, pk=id)
         movie.likes.add(request.user)
         return Response({"message": "Movie liked"}, status=status.HTTP_200_OK)
     
 
 class MovieUnlikeView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
-
-    def post(self, request, pk):
-        movie = get_object_or_404(Movie, pk=pk)
-        movie.likes.remove(request.user)
-        return Response({"message": "Like removed"}, status=status.HTTP_200_OK)
     
+    def get(self, request, id):  
+        movie = get_object_or_404(Movie, pk=id)
+        is_unlike = not movie.likes.filter(pk=request.user.id).exists() 
+        return Response({"unliked": is_unlike}, status=status.HTTP_200_OK)
+
+    def post(self, request, id):
+        movie = get_object_or_404(Movie, pk=id)
+        if movie.likes.filter(pk=request.user.id).exists():
+            movie.likes.remove(request.user)
+            return Response({"message": "Like removed"}, status=status.HTTP_200_OK)
+        return Response({"message": "You have not liked this movie"}, status=status.HTTP_400_BAD_REQUEST)
 
 class AddCommentView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -90,10 +96,21 @@ class AddCommentView(APIView):
 
 class DeleteCommentView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
-
-    def delete(self, request, pk):
-        comment = get_object_or_404(Comment, pk=pk)
+    
+    def delete(self, request, id):
+        comment = get_object_or_404(Comment, pk=id)
         if request.user == comment.user:
             comment.delete()
             return Response({"message": "Comment deleted"}, status=status.HTTP_204_NO_CONTENT)
         return Response({"error": "Not authorized"}, status=status.HTTP_403_FORBIDDEN)
+  
+
+class MovieSearchView(APIView):
+    def get(self, request):
+        query = request.GET.get("q", "")
+        if query:
+            movies = Movie.objects.filter(title__icontains=query)  
+            movie_data = [{"id": movie.id, "title": movie.title} for movie in movies]
+            return Response(movie_data, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "No query parameter provided"}, status=status.HTTP_400_BAD_REQUEST)
