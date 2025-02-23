@@ -10,12 +10,36 @@ from movieapp.serializers import *
 
 # Create your views here.
 
+class MovieByGenreAPIView(APIView):
+    """API that lists movies based on the specified genre."""
+    def get(self, request):
+        genre_name = request.query_params.get("genre", None)
+
+        if genre_name:
+            try:
+                genre = Category.objects.get(name=genre_name)  
+                movies = Movie.objects.filter(genres=genre) 
+                serializer = MovieSerializer(movies, many=True) 
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Category.DoesNotExist:
+                
+                return Response({"error": "Genre not found"}, 
+                                status=status.HTTP_404_NOT_FOUND
+                                )
+
+        return Response({"error": "Genre parameter is required"},
+                        status=status.HTTP_400_BAD_REQUEST
+                        )
+
+        
+
 class MoviePagination(PageNumberPagination):
+    """Pagination class that splits the movie list into pages."""
     page_size = 2
     
 
 class MovieListPostAPIView(APIView):
-  
+    """API that retrieves a list of movies and allows adding new ones."""
     pagination_class = MoviePagination
 
     def get(self, request):
@@ -36,8 +60,9 @@ class MovieListPostAPIView(APIView):
 
     
 class MovieDetailAPIView(APIView):
+    """API that retrieves, updates, and deletes a specific movie."""
     permission_classes = [IsAuthenticatedOrReadOnly]
-
+    
     def get(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
         serializer = MovieSerializer(movie)
@@ -58,6 +83,7 @@ class MovieDetailAPIView(APIView):
     
     
 class MovieLikeAPIView(APIView):
+    """API that handles liking a movie."""
     permission_classes = [IsAuthenticatedOrReadOnly]
     
     def get(self, request, id):
@@ -72,6 +98,7 @@ class MovieLikeAPIView(APIView):
     
 
 class MovieUnlikeAPIView(APIView):
+    """API that removes a like from a previously liked movie."""
     permission_classes = [IsAuthenticatedOrReadOnly]
     
     def get(self, request, id):  
@@ -87,6 +114,7 @@ class MovieUnlikeAPIView(APIView):
         return Response({"message": "You have not liked this movie"}, status=status.HTTP_400_BAD_REQUEST)
 
 class AddCommentAPIView(APIView):
+    """API that allows adding comments to a movie and viewing existing comments."""
     permission_classes = [IsAuthenticatedOrReadOnly]
     
     def get(self, request, id):
@@ -106,6 +134,7 @@ class AddCommentAPIView(APIView):
     
 
 class DeleteCommentAPIView(APIView):
+    """API that allows users to delete their own comments."""
     permission_classes = [IsAuthenticatedOrReadOnly]
     
     def delete(self, request, id):
@@ -117,6 +146,7 @@ class DeleteCommentAPIView(APIView):
   
 
 class MovieSearchAPIView(APIView):
+    """API that searches for movies by title."""
     def get(self, request):
         query = request.GET.get("q", "")
         if query:
