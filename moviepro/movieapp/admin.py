@@ -12,3 +12,11 @@ class MovieAdmin(admin.ModelAdmin):
 admin.site.register(Movie, MovieAdmin)
 admin.site.register(Comment)
 admin.site.register(Category)
+from django.contrib import admin
+from movieapp.models import Movie, MovieLike
+
+@admin.register(MovieLike)
+class MovieLikeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'movie', 'created_at')
+    search_fields = ('user__username', 'movie__title')
+    list_filter = ('created_at',)

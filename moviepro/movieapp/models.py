@@ -15,11 +15,24 @@ class Movie(models.Model):
     genres = models.ManyToManyField(Category, related_name="movies")  
     actors = models.TextField()
     trailer_link = models.URLField(blank=True)
-    likes = models.ManyToManyField(User, related_name="liked_movies", blank=True)  
+    likes = models.ManyToManyField(User, related_name="liked_movies", blank=True) 
+    views_count = models.PositiveIntegerField(default=0) 
 
     def __str__(self):
         return self.title
 
+
+class MovieLike(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "movie")  
+
+    def __str__(self):
+        return f"{self.user.username} liked {self.movie.title}"
+    
     
     
 class Comment(models.Model):

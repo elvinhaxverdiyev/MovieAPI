@@ -60,58 +60,74 @@ class MovieListPostAPIView(APIView):
 
     
 class MovieDetailAPIView(APIView):
-    """API that retrieves, updates, and deletes a specific movie."""
     permission_classes = [IsAuthenticatedOrReadOnly]
-    
+
     def get(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
+        movie.views_count += 1
+        movie.save(update_fields=["views_count"])
+        like_count = MovieLike.objects.filter(movie=movie).count()
+        
         serializer = MovieSerializer(movie)
-        return Response(serializer.data)
+        return Response({
+            "movie": serializer.data,
+            "like_count": like_count,
+            "views_count": movie.views_count,
+        }, status=status.HTTP_200_OK)
 
     def put(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
+
+        if request.user != movie.created_by:
+            return Response({"error": "You do not have permission to edit this movie"}, 
+                            status=status.HTTP_403_FORBIDDEN)
+
         serializer = MovieSerializer(movie, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
+
+        if request.user != movie.created_by: 
+            return Response({"error": "You do not have permission to delete this movie"}, 
+                            status=status.HTTP_403_FORBIDDEN
+                            )
+
         movie.delete()
-        return Response({"message": "Movie deleted"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Movie deleted"}, status=status.HTTP_204_NO_CONTENT
+                        )
+
     
     
 class MovieLikeAPIView(APIView):
     """API that handles liking a movie."""
-    permission_classes = [IsAuthenticatedOrReadOnly]
     
-    def get(self, request, id):
-        movie = get_object_or_404(Movie, pk=id)
-        is_liked = movie.likes.filter(id=request.user.id).exists() 
-        return Response({"liked": is_liked}, status=status.HTTP_200_OK)
-
     def post(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
-        movie.likes.add(request.user)
-        return Response({"message": "Movie liked"}, status=status.HTTP_200_OK)
+
+        if MovieLike.objects.filter(user=request.user, movie=movie).exists():
+            return Response({"message": "You have already liked this movie"}, status=status.HTTP_400_BAD_REQUEST)
+
+        MovieLike.objects.create(user=request.user, movie=movie)
+        return Response({"message": "Movie liked"}, status=status.HTTP_201_CREATED)
     
 
 class MovieUnlikeAPIView(APIView):
     """API that removes a like from a previously liked movie."""
-    permission_classes = [IsAuthenticatedOrReadOnly]
     
-    def get(self, request, id):  
-        movie = get_object_or_404(Movie, pk=id)
-        is_unlike = not movie.likes.filter(pk=request.user.id).exists() 
-        return Response({"unliked": is_unlike}, status=status.HTTP_200_OK)
-
     def post(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
-        if movie.likes.filter(pk=request.user.id).exists():
-            movie.likes.remove(request.user)
-            return Response({"message": "Like removed"}, status=status.HTTP_200_OK)
-        return Response({"message": "You have not liked this movie"}, status=status.HTTP_400_BAD_REQUEST)
+
+        like = MovieLike.objects.filter(user=request.user, movie=movie).first()
+        if not like:
+            return Response({"message": "You have not liked this movie"}, status=status.HTTP_400_BAD_REQUEST)
+
+        like.delete()
+        return Response({"message": "Like removed"}, status=status.HTTP_200_OK)
+
 
 class AddCommentAPIView(APIView):
     """API that allows adding comments to a movie and viewing existing comments."""
