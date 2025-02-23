@@ -7,7 +7,7 @@ from movieapp.models import *
 from movieapp.serializers import *
 # Create your views here.
 
-class MovieListPostView(APIView):
+class MovieListPostAPIView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
@@ -23,7 +23,7 @@ class MovieListPostView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     
-class MovieDetailView(APIView):
+class MovieDetailAPIView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, id):
@@ -45,9 +45,8 @@ class MovieDetailView(APIView):
         return Response({"message": "Movie deleted"}, status=status.HTTP_204_NO_CONTENT)
     
     
-class MovieLikeView(APIView):
+class MovieLikeAPIView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
-    
     
     def get(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
@@ -60,7 +59,7 @@ class MovieLikeView(APIView):
         return Response({"message": "Movie liked"}, status=status.HTTP_200_OK)
     
 
-class MovieUnlikeView(APIView):
+class MovieUnlikeAPIView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     
     def get(self, request, id):  
@@ -75,7 +74,7 @@ class MovieUnlikeView(APIView):
             return Response({"message": "Like removed"}, status=status.HTTP_200_OK)
         return Response({"message": "You have not liked this movie"}, status=status.HTTP_400_BAD_REQUEST)
 
-class AddCommentView(APIView):
+class AddCommentAPIView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     
     def get(self, request, id):
@@ -94,7 +93,7 @@ class AddCommentView(APIView):
         return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
     
 
-class DeleteCommentView(APIView):
+class DeleteCommentAPIView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     
     def delete(self, request, id):
@@ -105,7 +104,7 @@ class DeleteCommentView(APIView):
         return Response({"error": "Not authorized"}, status=status.HTTP_403_FORBIDDEN)
   
 
-class MovieSearchView(APIView):
+class MovieSearchAPIView(APIView):
     def get(self, request):
         query = request.GET.get("q", "")
         if query:
