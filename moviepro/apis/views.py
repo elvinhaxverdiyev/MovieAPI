@@ -3,25 +3,37 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.shortcuts import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
+
 from movieapp.models import *
 from movieapp.serializers import *
+
 # Create your views here.
 
+class MoviePagination(PageNumberPagination):
+    page_size = 2
+    
+
 class MovieListPostAPIView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+  
+    pagination_class = MoviePagination
 
     def get(self, request):
         movies = Movie.objects.all()
-        serializer = MovieSerializer(movies, many=True)
-        return Response(serializer.data)
 
-    def post(self, request):
+        pagination = self.pagination_class()  
+        result_page = pagination.paginate_queryset(movies, request) 
+
+        serializer = MovieSerializer(result_page, many=True)  
+        return pagination.get_paginated_response(serializer.data) 
+
+    def post(self, request, *args, **kwargs):
         serializer = MovieSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     
 class MovieDetailAPIView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
