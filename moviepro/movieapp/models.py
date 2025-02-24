@@ -12,6 +12,10 @@ class Category(models.Model):
 class Movie(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
+    created_by = models.ForeignKey(User, related_name="created_movies", 
+                                   on_delete=models.CASCADE,
+                                   default=1
+                                   )  
     genres = models.ManyToManyField(Category, related_name="movies")  
     actors = models.TextField()
     trailer_link = models.URLField(blank=True)
@@ -23,7 +27,7 @@ class Movie(models.Model):
 
 
 class MovieLike(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -31,7 +35,9 @@ class MovieLike(models.Model):
         unique_together = ("user", "movie")  
 
     def __str__(self):
-        return f"{self.user.username} liked {self.movie.title}"
+        user_name = self.user.username if self.user else "Anonymous"
+        return f"{user_name} liked {self.movie.title}"
+
     
     
     

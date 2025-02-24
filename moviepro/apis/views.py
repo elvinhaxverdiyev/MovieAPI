@@ -10,29 +10,6 @@ from movieapp.serializers import *
 
 # Create your views here.
 
-class MovieByGenreAPIView(APIView):
-    """API that lists movies based on the specified genre."""
-    def get(self, request):
-        genre_name = request.query_params.get("genre", None)
-
-        if genre_name:
-            try:
-                genre = Category.objects.get(name=genre_name)  
-                movies = Movie.objects.filter(genres=genre) 
-                serializer = MovieSerializer(movies, many=True) 
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except Category.DoesNotExist:
-                
-                return Response({"error": "Genre not found"}, 
-                                status=status.HTTP_404_NOT_FOUND
-                                )
-
-        return Response({"error": "Genre parameter is required"},
-                        status=status.HTTP_400_BAD_REQUEST
-                        )
-
-        
-
 class MoviePagination(PageNumberPagination):
     """Pagination class that splits the movie list into pages."""
     page_size = 2
@@ -52,7 +29,7 @@ class MovieListPostAPIView(APIView):
         return pagination.get_paginated_response(serializer.data) 
 
     def post(self, request, *args, **kwargs):
-        serializer = MovieSerializer(data=request.data)
+        serializer = MovieCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -75,14 +52,13 @@ class MovieDetailAPIView(APIView):
             "views_count": movie.views_count,
         }, status=status.HTTP_200_OK)
 
-    def put(self, request, id):
+    def patch(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
 
         if request.user != movie.created_by:
             return Response({"error": "You do not have permission to edit this movie"}, 
                             status=status.HTTP_403_FORBIDDEN)
-
-        serializer = MovieSerializer(movie, data=request.data, partial=True)
+        serializer = MovieUpdateSerializer(movie, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -101,32 +77,29 @@ class MovieDetailAPIView(APIView):
                         )
 
     
-    
 class MovieLikeAPIView(APIView):
     """API that handles liking a movie."""
-    
+    def get(self, request, id):
+        movie = get_object_or_404(Movie, pk=id)
+        likes_count = MovieLike.objects.filter(movie=movie).count()
+        likes = MovieLike.objects.filter(movie=movie).values("user__id") 
+        return Response({
+            "movie": movie.title,
+            "likes_count": likes_count,
+            "likes": list(likes)  
+        }, status=status.HTTP_200_OK)
+
     def post(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
+        user = request.user if request.user.is_authenticated else None
 
-        if MovieLike.objects.filter(user=request.user, movie=movie).exists():
+        if MovieLike.objects.filter(user=user, movie=movie).exists():
             return Response({"message": "You have already liked this movie"}, status=status.HTTP_400_BAD_REQUEST)
 
-        MovieLike.objects.create(user=request.user, movie=movie)
+        MovieLike.objects.create(user=user, movie=movie)
+        movie.likes_count = movie.likes.count() 
+        movie.save()
         return Response({"message": "Movie liked"}, status=status.HTTP_201_CREATED)
-    
-
-class MovieUnlikeAPIView(APIView):
-    """API that removes a like from a previously liked movie."""
-    
-    def post(self, request, id):
-        movie = get_object_or_404(Movie, pk=id)
-
-        like = MovieLike.objects.filter(user=request.user, movie=movie).first()
-        if not like:
-            return Response({"message": "You have not liked this movie"}, status=status.HTTP_400_BAD_REQUEST)
-
-        like.delete()
-        return Response({"message": "Like removed"}, status=status.HTTP_200_OK)
 
 
 class AddCommentAPIView(APIView):
@@ -171,3 +144,25 @@ class MovieSearchAPIView(APIView):
             return Response(movie_data, status=status.HTTP_200_OK)
         else:
             return Response({"message": "No query parameter provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MovieByGenreAPIView(APIView):
+    """API that lists movies based on the specified genre."""
+    def get(self, request):
+        genre_name = request.query_params.get("genre", None)
+
+        if genre_name:
+            try:
+                genre = Category.objects.get(name=genre_name)  
+                movies = Movie.objects.filter(genres=genre) 
+                serializer = MovieSerializer(movies, many=True) 
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Category.DoesNotExist:
+                
+                return Response({"error": "Genre not found"}, 
+                                status=status.HTTP_404_NOT_FOUND
+                                )
+
+        return Response({"error": "Genre parameter is required"},
+                        status=status.HTTP_400_BAD_REQUEST
+                        )
