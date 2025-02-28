@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from users.models import CustomUser
 
 # Create your models here.
 class Category(models.Model):
@@ -12,14 +12,18 @@ class Category(models.Model):
 class Movie(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    created_by = models.ForeignKey(User, related_name="created_movies", 
+    created_by = models.ForeignKey(CustomUser,
+                                   related_name="created_movies", 
                                    on_delete=models.CASCADE,
                                    default=1
                                    )  
     genres = models.ManyToManyField(Category, related_name="movies")  
     actors = models.TextField()
     trailer_link = models.URLField(blank=True)
-    likes = models.ManyToManyField(User, related_name="liked_movies", blank=True) 
+    likes = models.ManyToManyField(CustomUser, 
+                                   related_name="liked_movies", 
+                                   blank=True
+                                   ) 
     views_count = models.PositiveIntegerField(default=0) 
 
     def __str__(self):
@@ -27,7 +31,7 @@ class Movie(models.Model):
 
 
 class MovieLike(models.Model):
-    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, null=True, on_delete=models.CASCADE)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -43,7 +47,7 @@ class MovieLike(models.Model):
     
 class Comment(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="comments")
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 

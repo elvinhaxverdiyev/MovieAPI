@@ -2,13 +2,41 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
+
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny
+from rest_framework.authtoken.models import Token
 
+
+from users.serializers import CustomUserRegisterSerializer
 from movieapp.models import *
 from movieapp.serializers import *
 
 # Create your views here.
+
+class UserRegisterAPIView(APIView):
+    """APIView for user registration."""
+    permission_classes = [AllowAny] 
+
+    def post(self, request, *args, **kwargs):
+        """Handle POST requests to create a new user."""
+        serializer = CustomUserRegisterSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            user = serializer.save() 
+            token, created = Token.objects.get_or_create(user=user)  
+            return Response({
+                "message": "Profile created successfully",
+                "username": user.username,
+                "email": user.email,
+                "token": token.key
+            }, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class MoviePagination(PageNumberPagination):
     """Pagination class that splits the movie list into pages."""
@@ -17,6 +45,7 @@ class MoviePagination(PageNumberPagination):
 
 class MovieListPostAPIView(APIView):
     """API that retrieves a list of movies and allows adding new ones."""
+    permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = MoviePagination
 
     def get(self, request):
