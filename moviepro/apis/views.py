@@ -2,17 +2,23 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
 
 from users.serializers import *
 from movieapp.models import *
 from movieapp.serializers import *
 
 # Create your views here.
+
+class HeHasPermission(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj.user or request.user.is_staff
+    
 
 class UserListAPIView(APIView):
     """APIView to list all users."""
@@ -131,6 +137,8 @@ class MovieDetailAPIView(APIView):
     
 class MovieLikeAPIView(APIView):
     """API that handles liking a movie."""
+    permission_classes = [AllowAny]
+    
     def get(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
         likes_count = MovieLike.objects.filter(movie=movie).count()
@@ -156,8 +164,10 @@ class MovieLikeAPIView(APIView):
 
 class AddCommentAPIView(APIView):
     """API that allows adding comments to a movie and viewing existing comments."""
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [HeHasPermission]
+        
     def get(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
         comments = Comment.objects.filter(movie=movie)
@@ -165,6 +175,9 @@ class AddCommentAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, id):
+        if not request.user.is_authenticated:
+            return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
+
         movie = get_object_or_404(Movie, pk=id)
         comment = Comment.objects.create(
             movie=movie,
@@ -172,12 +185,13 @@ class AddCommentAPIView(APIView):
             text=request.data.get("text")
         )
         return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
-    
+
 
 class DeleteCommentAPIView(APIView):
     """API that allows users to delete their own comments."""
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, HeHasPermission]
+        
     def delete(self, request, id):
         comment = get_object_or_404(Comment, pk=id)
         if request.user == comment.user:
