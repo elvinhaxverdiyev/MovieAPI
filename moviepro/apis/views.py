@@ -96,19 +96,14 @@ class MovieListPostAPIView(APIView):
     
 class MovieDetailAPIView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
-
+    
     def get(self, request, id):
-        movie = get_object_or_404(Movie, pk=id)
-        movie.views_count += 1
-        movie.save(update_fields=["views_count"])
-        like_count = MovieLike.objects.filter(movie=movie).count()
-        
-        serializer = MovieSerializer(movie)
-        return Response({
-            "movie": serializer.data,
-            "like_count": like_count,
-            "views_count": movie.views_count,
-        }, status=status.HTTP_200_OK)
+        try:
+            movie = Movie.objects.get(pk=id) 
+            serializer = MovieSerializer(movie)
+            return Response(serializer.data)
+        except Movie.DoesNotExist:
+            return Response({"detail": "Movie not found."}, status=status.HTTP_404_NOT_FOUND)
 
     def patch(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
@@ -131,7 +126,8 @@ class MovieDetailAPIView(APIView):
                             )
 
         movie.delete()
-        return Response({"message": "Movie deleted"}, status=status.HTTP_204_NO_CONTENT
+        return Response({"message": "Movie deleted"}, 
+                        status=status.HTTP_204_NO_CONTENT
                         )
 
     
@@ -154,12 +150,16 @@ class MovieLikeAPIView(APIView):
         user = request.user if request.user.is_authenticated else None
 
         if MovieLike.objects.filter(user=user, movie=movie).exists():
-            return Response({"message": "You have already liked this movie"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "You have already liked this movie"},
+                            status=status.HTTP_400_BAD_REQUEST
+                            )
 
         MovieLike.objects.create(user=user, movie=movie)
         movie.likes_count = movie.likes.count() 
         movie.save()
-        return Response({"message": "Movie liked"}, status=status.HTTP_201_CREATED)
+        return Response({"message": "Movie liked"}, 
+                        status=status.HTTP_201_CREATED
+                        )
 
 
 class AddCommentAPIView(APIView):

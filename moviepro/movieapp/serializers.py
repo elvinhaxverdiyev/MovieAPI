@@ -15,16 +15,30 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class MovieLikeSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source="user.username", read_only=True) 
+    class Meta:
+        model = MovieLike
+        fields = ["user_name"] 
+        
+
 class MovieSerializer(serializers.ModelSerializer):
-    comments = CommentSerializer(many=True, read_only=True)
-    likes_count = serializers.SerializerMethodField()
-    
+    like_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Movie
-        fields = "__all__"
-
-    def get_likes_count(self, obj):
-        return obj.likes.count()  
+        fields = [
+                  "id",
+                  "title", 
+                  "description", 
+                  "actors", 
+                  "trailer_link", 
+                  "views_count", 
+                  "like_count"
+                  ]  
+        
+    def get_like_count(self, obj):
+         return MovieLike.objects.filter(movie=obj).count()
 
 
 class MovieCreateSerializer(serializers.ModelSerializer):
@@ -48,7 +62,15 @@ class MovieUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = ["title", "description", "actors", "trailer_link", "genres", "views_count", "likes_count"]
+        fields = [
+            "title", 
+            "description", 
+            "actors", 
+            "trailer_link", 
+            "genres", 
+            "views_count", 
+            "likes_count"
+            ]
 
     def update(self, instance, validated_data):
         instance.title = validated_data.get("title", instance.title)
