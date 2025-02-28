@@ -3,6 +3,8 @@ from .views import *
 
 urlpatterns = [
     path('register/', UserRegisterAPIView.as_view(), name="register"),
+    path('login/', LogInAPIView.as_view(), name="login"),
+    path('users/', UserListAPIView.as_view(), name="user-list"),
     path('movies/', MovieListPostAPIView.as_view(), name="movie-list"),
     path('movies/<int:id>/', MovieDetailAPIView.as_view(), name="movie-detail"),
     path('movies/<int:id>/like/', MovieLikeAPIView.as_view(), name="movie-like"),

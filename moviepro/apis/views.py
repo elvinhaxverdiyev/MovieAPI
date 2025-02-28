@@ -8,11 +8,22 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
 
-from users.serializers import CustomUserRegisterSerializer
+from users.serializers import *
 from movieapp.models import *
 from movieapp.serializers import *
 
 # Create your views here.
+
+class UserListAPIView(APIView):
+    """APIView to list all users."""
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get(self, request, *args, **kwargs):
+        users = CustomUser.objects.all()
+        serializer = CustomUserSerializer(users, many=True)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class UserRegisterAPIView(APIView):
     """APIView for user registration."""
@@ -33,7 +44,21 @@ class UserRegisterAPIView(APIView):
             }, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
+    
+class LogInAPIView(APIView):
+    """Users login APi method"""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data["user"] 
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({"message": "Login successful", "token": token.key
+            }, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MoviePagination(PageNumberPagination):
@@ -163,6 +188,8 @@ class DeleteCommentAPIView(APIView):
 
 class MovieSearchAPIView(APIView):
     """API that searches for movies by title."""
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
     def get(self, request):
         query = request.GET.get("q", "")
         if query:
@@ -175,6 +202,8 @@ class MovieSearchAPIView(APIView):
 
 class MovieByGenreAPIView(APIView):
     """API that lists movies based on the specified genre."""
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
     def get(self, request):
         genre_name = request.query_params.get("genre", None)
 
