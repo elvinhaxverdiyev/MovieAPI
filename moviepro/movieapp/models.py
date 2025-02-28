@@ -43,8 +43,6 @@ class MovieLike(models.Model):
         return f"{user_name} liked {self.movie.title}"
 
     
-    
-    
 class Comment(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
