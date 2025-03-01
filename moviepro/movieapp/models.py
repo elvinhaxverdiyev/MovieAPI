@@ -7,6 +7,13 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+    
+    
+class Actor(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
 
 
 class Movie(models.Model):
@@ -18,7 +25,7 @@ class Movie(models.Model):
                                    default=1
                                    )  
     genres = models.ManyToManyField(Category, related_name="movies")  
-    actors = models.TextField()
+    actors = models.ManyToManyField(Actor, related_name="movies")
     trailer_link = models.URLField(blank=True)
     likes = models.ManyToManyField(CustomUser, 
                                    related_name="liked_movies", 

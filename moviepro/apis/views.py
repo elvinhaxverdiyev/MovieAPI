@@ -8,10 +8,13 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
+from django.core.mail import send_mail
 
+from django.conf import settings
 from users.serializers import *
 from movieapp.models import *
 from movieapp.serializers import *
+from users.models import *
 
 # Create your views here.
 
@@ -87,8 +90,9 @@ class MoviePagination(PageNumberPagination):
     
 
 class MovieListPostAPIView(APIView):
-    """API that retrieves a list of movies and allows adding new ones."""
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    """API that retrieves a list ofpermission_classes = [AllowAny]movies and allows adding new ones."""
+    permission_classes = [AllowAny]
+    authentication_classes = [TokenAuthentication]
     pagination_class = MoviePagination
 
     def get(self, request):

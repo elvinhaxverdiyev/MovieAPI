@@ -42,21 +42,44 @@ class MovieSerializer(serializers.ModelSerializer):
 
 
 class MovieCreateSerializer(serializers.ModelSerializer):
+    genres = serializers.ListField(child=serializers.CharField(), write_only=True)
+    actors = serializers.ListField(child=serializers.CharField(), write_only=True)
+    genres_display = serializers.SerializerMethodField(read_only=True)
+    actors_display = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Movie
-        fields = ["title", "description", "genres", "actors", "trailer_link"]  
-        extra_kwargs = {
-            "genres": {"required": True},  
-        }
-
+        fields = [
+            "title",
+            "description",
+            "genres",
+            "actors",
+            "genres_display",
+            "actors_display"
+        ]
+    
     def create(self, validated_data):
-        genres = validated_data.pop("genres", [])  
-        movie = Movie.objects.create(**validated_data) 
+        genres = validated_data.pop("genres", [])
+        actors_list = validated_data.pop("actors", [])
+        movie = Movie.objects.create(**validated_data)
 
-        movie.genres.set(genres)  
+        for genre_name in genres:
+            genre, created = Category.objects.get_or_create(name=genre_name)
+            movie.genres.add(genre)
+
+        for actor_name in actors_list:
+            actor, created = Actor.objects.get_or_create(name=actor_name)
+            movie.actors.add(actor)
+
         return movie
-    
-    
+
+    def get_genres_display(self, obj):
+        return [genre.name for genre in obj.genres.all()]
+
+    def get_actors_display(self, obj):
+        return [actor.name for actor in obj.actors.all()]
+
+
 class MovieUpdateSerializer(serializers.ModelSerializer):
     likes_count = serializers.IntegerField(read_only=True) 
 

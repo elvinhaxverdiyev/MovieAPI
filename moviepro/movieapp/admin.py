@@ -12,8 +12,7 @@ class MovieAdmin(admin.ModelAdmin):
 admin.site.register(Movie, MovieAdmin)
 admin.site.register(Comment)
 admin.site.register(Category)
-from django.contrib import admin
-from movieapp.models import Movie, MovieLike
+admin.site.register(Actor)
 
 @admin.register(MovieLike)
 class MovieLikeAdmin(admin.ModelAdmin):
