@@ -110,16 +110,12 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = 'users.CustomUser' 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ],
-    # Opsiyonel: Token doğrulama için ek ayarlar
-    'DEFAULT_TOKEN_MODEL': 'rest_framework.authtoken.Token',  # Varsayılan token modeli
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # Pagination için
-    'PAGE_SIZE': 10,  # Her sayfada 10 öğe
+    ),
 }
 
 
@@ -145,10 +141,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'elvinhaxverdiyev777@gmail.com' 
-EMAIL_HOST_PASSWORD = 'jvpnvtihqmiczdwe'  
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  
+EMAIL_HOST = 'smtp.gmail.com'                                  
+EMAIL_PORT = 587                                               
+EMAIL_USE_TLS = True                                          
+EMAIL_HOST_USER = 'elvinhaxverdiyev777@gmail.com'                     
+EMAIL_HOST_PASSWORD = 'wxhoaindvsasxmki'

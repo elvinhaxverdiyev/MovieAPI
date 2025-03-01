@@ -19,11 +19,9 @@ class Actor(models.Model):
 class Movie(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    created_by = models.ForeignKey(CustomUser,
+    created_by = models.ForeignKey(CustomUser,  
                                    related_name="created_movies", 
-                                   on_delete=models.CASCADE,
-                                   default=1
-                                   )  
+                                   on_delete=models.CASCADE)  
     genres = models.ManyToManyField(Category, related_name="movies")  
     actors = models.ManyToManyField(Actor, related_name="movies")
     trailer_link = models.URLField(blank=True)

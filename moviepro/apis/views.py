@@ -15,6 +15,7 @@ from users.serializers import *
 from movieapp.models import *
 from movieapp.serializers import *
 from users.models import *
+from notifications.sendmail import send_movie_created_email
 
 # Create your views here.
 
@@ -90,25 +91,34 @@ class MoviePagination(PageNumberPagination):
     
 
 class MovieListPostAPIView(APIView):
-    """API that retrieves a list ofpermission_classes = [AllowAny]movies and allows adding new ones."""
-    permission_classes = [AllowAny]
-    authentication_classes = [TokenAuthentication]
+    """API that retrieves a list of movies and allows adding new ones."""
+    
+    permission_classes = [AllowAny]  
     pagination_class = MoviePagination
-
+    
     def get(self, request):
-        movies = Movie.objects.all()
-
+        movies = Movie.objects.all()  
         pagination = self.pagination_class()  
         result_page = pagination.paginate_queryset(movies, request) 
-
         serializer = MovieSerializer(result_page, many=True)  
         return pagination.get_paginated_response(serializer.data) 
-
+    
     def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response(
+                {"detail": "You must be logged in to create a movie."}, 
+                status=status.HTTP_401_UNAUTHORIZED
+                )
+        
+        permission_classes = [IsAuthenticated]  
+        
         serializer = MovieCreateSerializer(data=request.data)
+
         if serializer.is_valid():
-            serializer.save()
+            movie = serializer.save(created_by=request.user) 
+            send_movie_created_email(movie)  
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     
