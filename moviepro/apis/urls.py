@@ -4,6 +4,7 @@ from .views import *
 urlpatterns = [
     path('register/', UserRegisterAPIView.as_view(), name="register"),
     path('login/', LogInAPIView.as_view(), name="login"),
+    path('logout/', UserLogoutAPIView.as_view(), name="logout"),
     path('users/', UserListAPIView.as_view(), name="user-list"),
     path('movies/', MovieListPostAPIView.as_view(), name="movie-list"),
     path('movies/<int:id>/', MovieDetailAPIView.as_view(), name="movie-detail"),

@@ -67,6 +67,20 @@ class LogInAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserLogoutAPIView(APIView):
+    """APIView for user logout."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """Handle POST requests to log out a user."""
+        try:
+            token = Token.objects.get(user=request.user)
+            token.delete() 
+            return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+        except Token.DoesNotExist:
+            return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+        
+
 class MoviePagination(PageNumberPagination):
     """Pagination class that splits the movie list into pages."""
     page_size = 2
