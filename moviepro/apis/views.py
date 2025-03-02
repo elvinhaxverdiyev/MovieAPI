@@ -124,7 +124,12 @@ class MovieListPostAPIView(APIView):
 
     
 class MovieDetailAPIView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    authentication_classes = [TokenAuthentication]  
+    
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAuthenticated()]
     
     def get(self, request, id):
         try:
@@ -136,16 +141,16 @@ class MovieDetailAPIView(APIView):
 
     def patch(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
-
         if request.user != movie.created_by:
-            return Response({"error": "You do not have permission to edit this movie"}, 
+            return Response({"error": "You do not have permission to edit this movie"},
                             status=status.HTTP_403_FORBIDDEN)
+        
         serializer = MovieUpdateSerializer(movie, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
     def delete(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
 
