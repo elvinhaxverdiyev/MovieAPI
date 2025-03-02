@@ -74,6 +74,7 @@ class LogInAPIView(APIView):
 class UserLogoutAPIView(APIView):
     """APIView for user logout."""
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def post(self, request):
         """Handle POST requests to log out a user."""
@@ -161,7 +162,7 @@ class MovieDetailAPIView(APIView):
     
 class MovieLikeAPIView(APIView):
     """API that handles liking a movie."""
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     
     def get(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
