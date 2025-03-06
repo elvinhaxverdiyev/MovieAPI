@@ -302,3 +302,12 @@ class MovieByGenreAPIView(APIView):
         return Response({"error": "Genre parameter is required"},
                         status=status.HTTP_400_BAD_REQUEST
                         )
+        
+
+class GenreListAPIView(APIView):
+    
+    def get(self, request):
+        categories = Category.objects.all()
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    

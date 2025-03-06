@@ -15,4 +15,5 @@ urlpatterns = [
     path('comments/<int:id>/delete/', DeleteCommentAPIView.as_view(), name="delete-comment"),
     path('movies/search/', MovieSearchAPIView.as_view(), name="movie-search"),
     path('movies/by_genre/', MovieByGenreAPIView.as_view(), name="movies-by-genre"),
+    path('genres/', GenreListAPIView.as_view(), name="genre-list")
 ]
