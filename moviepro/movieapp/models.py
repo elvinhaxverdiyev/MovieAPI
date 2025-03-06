@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+
 from users.models import CustomUser
 
 # Create your models here.
@@ -19,6 +21,7 @@ class Actor(models.Model):
 class Movie(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
+    image = models.ImageField(upload_to="movie_images/", null=True, blank=True) 
     created_by = models.ForeignKey(CustomUser,  
                                    related_name="created_movies", 
                                    on_delete=models.CASCADE)  
@@ -30,6 +33,7 @@ class Movie(models.Model):
                                    blank=True
                                    ) 
     views_count = models.PositiveIntegerField(default=0) 
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
