@@ -19,6 +19,11 @@ from notifications.sendmail import send_movie_created_email
 
 # Create your views here.
 
+class MoviePagination(PageNumberPagination):
+    """Pagination class that splits the movie list into pages."""
+    page_size = 2
+    
+
 class HeHasPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         return request.user == obj.user or request.user.is_staff
@@ -27,12 +32,14 @@ class HeHasPermission(BasePermission):
 class UserListAPIView(APIView):
     """APIView to list all users."""
     permission_classes = [IsAuthenticatedOrReadOnly]
-    
+    pagination_class = MoviePagination  
+
     def get(self, request, *args, **kwargs):
-        users = CustomUser.objects.all()
-        serializer = CustomUserSerializer(users, many=True)
-        
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        users = CustomUser.objects.all()  
+        pagination = self.pagination_class()  
+        result_page = pagination.paginate_queryset(users, request) 
+        serializer = CustomUserSerializer(result_page, many=True)
+        return pagination.get_paginated_response(serializer.data)
 
 
 class UserRegisterAPIView(APIView):
@@ -116,12 +123,7 @@ class UserLogoutAPIView(APIView):
             return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
         except Token.DoesNotExist:
             return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
-        
-
-class MoviePagination(PageNumberPagination):
-    """Pagination class that splits the movie list into pages."""
-    page_size = 2
-    
+      
 
 class MovieListPostAPIView(APIView):
     """API that retrieves a list of movies and allows adding new ones."""
