@@ -24,19 +24,31 @@ class MovieLikeSerializer(serializers.ModelSerializer):
 
 class MovieSerializer(serializers.ModelSerializer):
     like_count = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Movie
         fields = [
-                  "id",
-                  "title", 
-                  "description", 
-                  "actors", 
-                  "trailer_link", 
-                  "views_count", 
-                  "like_count"
-                  ]  
-        
+            "id",
+            "title",
+            "description",
+            "actors",
+            "trailer_link",
+            "views_count",
+            "like_count",
+            "image",
+        ]
+
+    def get_image(self, obj):
+        if obj.image:
+            try:
+                request = self.context["request"]  
+                return request.build_absolute_uri(obj.image.url)
+            except KeyError: 
+                return obj.image.url
+        return None
+
+
     def get_like_count(self, obj):
          return MovieLike.objects.filter(movie=obj).count()
 
@@ -46,6 +58,7 @@ class MovieCreateSerializer(serializers.ModelSerializer):
     actors = serializers.ListField(child=serializers.CharField(), write_only=True)
     genres_display = serializers.SerializerMethodField(read_only=True)
     actors_display = serializers.SerializerMethodField(read_only=True)
+    image = serializers.ImageField(write_only=True, required=False) 
 
     class Meta:
         model = Movie
@@ -55,12 +68,14 @@ class MovieCreateSerializer(serializers.ModelSerializer):
             "genres",
             "actors",
             "genres_display",
-            "actors_display"
+            "actors_display",
+            "image",  
         ]
     
     def create(self, validated_data):
         genres = validated_data.pop("genres", [])
         actors_list = validated_data.pop("actors", [])
+        image = validated_data.pop("image", None)  
         movie = Movie.objects.create(**validated_data)
 
         for genre_name in genres:
@@ -70,6 +85,9 @@ class MovieCreateSerializer(serializers.ModelSerializer):
         for actor_name in actors_list:
             actor, created = Actor.objects.get_or_create(name=actor_name)
             movie.actors.add(actor)
+        if image:
+            movie.image = image
+            movie.save()
 
         return movie
 

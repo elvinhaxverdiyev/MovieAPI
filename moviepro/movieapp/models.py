@@ -21,7 +21,7 @@ class Actor(models.Model):
 class Movie(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    image = models.ImageField(upload_to="movie_images/", null=True, blank=True) 
+    image = models.ImageField(upload_to="movies/", null=True, blank=True) 
     created_by = models.ForeignKey(CustomUser,  
                                    related_name="created_movies", 
                                    on_delete=models.CASCADE)  
