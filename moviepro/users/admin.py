@@ -10,22 +10,18 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ("username", "email", "bio")
     ordering = ("username",)
     
-    # Redefining the fieldsets to include bio and image fields in the admin panel
     fieldsets = UserAdmin.fieldsets + (
         (None, {"fields": ("bio", "image")}),
     )
 
-    # Adding a preview for the user's image in the admin panel
     def image_preview(self, obj):
         if obj.image:
             return format_html('<img src="{}" style="width: 50px; height: 50px; border-radius: 50%;" />', obj.image.url)
         return "Şəkil yoxdur"
     image_preview.short_description = 'Profil Şəkli'
 
-    # Adding a snippet of the bio to the list display
     def bio_snippet(self, obj):
         return obj.bio[:50] + '...' if obj.bio else "No bio"
     bio_snippet.short_description = 'Bio Snippet'
 
-# Registering the CustomUser model with the updated admin
 admin.site.register(CustomUser, CustomUserAdmin)
