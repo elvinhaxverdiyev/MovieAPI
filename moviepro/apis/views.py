@@ -6,19 +6,15 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.authentication import TokenAuthentication
-from django.core.mail import send_mail
 
-from django.conf import settings
 from .pagginations import MoviePagination
+from .permission_class import HeHasPermission
 from users.serializers import *
 from movieapp.models import *
 from movieapp.serializers import *
 from users.models import *
 from notifications.sendmail import send_movie_created_email
 
-
-
-      
 
 class MovieListPostAPIView(APIView):
     """API that retrieves a list of movies and allows adding new ones."""

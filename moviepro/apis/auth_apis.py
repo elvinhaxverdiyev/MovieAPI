@@ -17,8 +17,10 @@ from users.models import *
 
 class UserListAPIView(APIView):
     """APIView to list all users."""
+    
     permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = MoviePagination  
+    http_method_names = ["get"]
 
     def get(self, request, *args, **kwargs):
         users = CustomUser.objects.all()  
@@ -31,6 +33,7 @@ class UserListAPIView(APIView):
 class UserRegisterAPIView(APIView):
     """APIView for user registration."""
     permission_classes = [AllowAny] 
+    http_method_names = ["post"]
 
     def post(self, request, *args, **kwargs):
         """Handle POST requests to create a new user."""
@@ -52,6 +55,7 @@ class UserRegisterAPIView(APIView):
 class LogInAPIView(APIView):
     """Users login APi method"""
     permission_classes = [AllowAny]
+    http_method_names = ["post"]
     
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
@@ -66,6 +70,7 @@ class LogInAPIView(APIView):
     
 class AccountDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    http_method_names = ["get", "put"]
 
     def get(self, request):
         serializer = CustomUserSerializer(request.user)
@@ -81,6 +86,7 @@ class AccountDetailAPIView(APIView):
 
 class ChangePasswordAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    http_method_names = ["put"]
 
     def put(self, request):
         serializer = ChangePasswordSerializer(data=request.data)
@@ -100,6 +106,7 @@ class UserLogoutAPIView(APIView):
     """APIView for user logout."""
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
+    http_method_names = ["post"]
 
     def post(self, request):
         """Handle POST requests to log out a user."""
