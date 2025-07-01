@@ -2,32 +2,21 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from django.core.mail import send_mail
 
 from django.conf import settings
+from .pagginations import MoviePagination
 from users.serializers import *
 from movieapp.models import *
 from movieapp.serializers import *
 from users.models import *
 from notifications.sendmail import send_movie_created_email
 
-# Create your views here.
-
-class MoviePagination(PageNumberPagination):
-    """Pagination class that splits the movie list into pages."""
-    page_size = 2
-    
-
-class HeHasPermission(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return request.user == obj.user or request.user.is_staff
-    
 
 class UserListAPIView(APIView):
     """APIView to list all users."""
