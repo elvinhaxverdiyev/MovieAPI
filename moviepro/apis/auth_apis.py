@@ -15,6 +15,16 @@ from movieapp.serializers import *
 from users.models import *
 
 
+__all__ = [
+    "UserListAPIView",
+    "UserRegisterAPIView",
+    "LogInAPIView",
+    "AccountDetailAPIView",
+    "ChangePasswordAPIView",
+    "UserLogoutAPIView",
+]
+
+
 class UserListAPIView(APIView):
     """APIView to list all users."""
     
