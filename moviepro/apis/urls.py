@@ -1,8 +1,9 @@
 from django.urls import path
 from .auth_apis import *
-from .views import *
 from .movie_control import *
-from .interactions_api import *
+from .interactions_apis import *
+from .genre_apis import *
+from .search_and_filter_apis import *
 
 
 urlpatterns = [

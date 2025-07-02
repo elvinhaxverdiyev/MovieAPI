@@ -3,26 +3,24 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from users.serializers import *
-from movieapp.models import *
-from movieapp.serializers import *
-from users.models import *
+from movieapp.models import Category
+from movieapp.serializers import CategorySerializer
+from movieapp.models import Movie
+from movieapp.serializers import MovieSerializer
 
-    
-class MovieSearchAPIView(APIView):
-    """API that searches for movies by title."""
-    permission_classes = [IsAuthenticatedOrReadOnly]
+__all__ = [
+    "GenreListAPIView",
+    "MovieByGenreAPIView"
+]
+
+class GenreListAPIView(APIView):
     
     def get(self, request):
-        query = request.GET.get("q", "")
-        if query:
-            movies = Movie.objects.filter(title__icontains=query)  
-            movie_data = [{"id": movie.id, "title": movie.title} for movie in movies]
-            return Response(movie_data, status=status.HTTP_200_OK)
-        else:
-            return Response({"message": "No query parameter provided"}, status=status.HTTP_400_BAD_REQUEST)
-
-
+        categories = Category.objects.all()
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
 class MovieByGenreAPIView(APIView):
     """API that lists movies based on the specified genre."""
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -45,12 +43,3 @@ class MovieByGenreAPIView(APIView):
         return Response({"error": "Genre parameter is required"},
                         status=status.HTTP_400_BAD_REQUEST
                         )
-        
-
-class GenreListAPIView(APIView):
-    
-    def get(self, request):
-        categories = Category.objects.all()
-        serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
