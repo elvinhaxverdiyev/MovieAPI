@@ -9,13 +9,10 @@ from rest_framework.authentication import TokenAuthentication
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-
-from .pagginations import MoviePagination
 from .pagginations import MoviePagination
 from users.serializers import *
 from movieapp.models import *
-from movieapp.serializers import *
-from users.models import *
+
 
 
 __all__ = [
