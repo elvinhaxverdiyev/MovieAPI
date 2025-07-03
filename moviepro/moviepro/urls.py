@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include("apis.urls")),  
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger'), 
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  
 
