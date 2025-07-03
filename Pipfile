@@ -8,9 +8,9 @@ django = "*"
 pillow = "*"
 djangorestframework = "*"
 python-dotenv = "*"
+drf-yasg = "*"
 
 [dev-packages]
 
 [requires]
 python_version = "3.13"
-
