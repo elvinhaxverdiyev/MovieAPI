@@ -1,26 +1,10 @@
-from .models import *
 from rest_framework import serializers
 
-class CommentSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
-    
-    class Meta:
-        model = Comment
-        fields = "__all__"
-        
-        
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = "__all__"
+from movieapp.models.movie_models import Movie
+from movieapp.models.interactions_models import MovieLike
+from movieapp.models.actors_models import Actor
+from movieapp.models.category_models import Category
 
-
-class MovieLikeSerializer(serializers.ModelSerializer):
-    user_name = serializers.CharField(source="user.username", read_only=True) 
-    class Meta:
-        model = MovieLike
-        fields = ["user_name"] 
-        
 
 class MovieSerializer(serializers.ModelSerializer):
     like_count = serializers.SerializerMethodField()
