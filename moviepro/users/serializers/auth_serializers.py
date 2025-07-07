@@ -6,6 +6,16 @@ from users.models.user_models import CustomUser
 
 
 class CustomUserRegisterSerializer(serializers.ModelSerializer):
+    """
+    Serializer for registering a new CustomUser.
+
+    Validates:
+    - Password and password confirmation match.
+    - Password conforms to Django's password validation rules.
+
+    Fields:
+    - username, email, password, password_two, first_name, last_name, bio, image
+    """
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password_two = serializers.CharField(write_only=True, required=True)
 
