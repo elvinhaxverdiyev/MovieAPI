@@ -34,6 +34,21 @@ class CustomUserRegisterSerializer(serializers.ModelSerializer):
 
     
 class LoginSerializer(serializers.Serializer):
+    """
+    Serializer for handling user login authentication.
+
+    Fields:
+        username (CharField): The user's username.
+        password (CharField): The user's password (write-only).
+
+    Methods:
+        validate(data):
+            Authenticates the user with the provided username and password.
+            Returns:
+                dict: Dictionary containing the authenticated user instance.
+            Raises:
+                serializers.ValidationError: If authentication fails due to invalid credentials.
+    """
     username = serializers.CharField(max_length=150)
     password = serializers.CharField(write_only=True)
 
