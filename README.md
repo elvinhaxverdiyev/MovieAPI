@@ -48,4 +48,7 @@ Troubleshooting 🛠️
 If you encounter any errors with authentication, ensure your token is correct.
 For issues with pagination, check the page_size or use query parameters to navigate between pages.
 
+Documentation Link:
+http://127.0.0.1:8000/swagger/
+
 Enjoy using the Movie API! 🎉
