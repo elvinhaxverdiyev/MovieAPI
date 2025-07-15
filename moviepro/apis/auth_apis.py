@@ -8,6 +8,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 from .pagginations import MoviePagination
 from users.serializers import *
@@ -53,7 +55,7 @@ class UserRegisterAPIView(APIView):
         request_body=CustomUserRegisterSerializer,
         operation_description="Register a new user",
         responses={
-            201: openapi.Response("Created", CustomUserSerializer),
+            201: openapi.Response("Created", CustomUserRegisterSerializer),
             400: "Bad Request"
         }
     )
@@ -63,15 +65,16 @@ class UserRegisterAPIView(APIView):
         
         if serializer.is_valid():
             user = serializer.save() 
-            token, created = Token.objects.get_or_create(user=user)  
+            refresh = RefreshToken.for_user(user)
             return Response({
                 "message": "Profile created successfully",
                 "username": user.username,
                 "email": user.email,
-                "token": token.key
+                "access": str(refresh.access_token),
+                "refresh": str(refresh)
             }, status=status.HTTP_201_CREATED)
-        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
     
 class LogInAPIView(APIView):
@@ -96,9 +99,12 @@ class LogInAPIView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.validated_data["user"] 
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({"message": "Login successful", "token": token.key
+            user = serializer.validated_data["user"]
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "message": "Login successful",
+                "access": str(refresh.access_token),
+                "refresh": str(refresh)
             }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
