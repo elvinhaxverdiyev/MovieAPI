@@ -162,23 +162,32 @@ class ChangePasswordAPIView(APIView):
     
 
 class UserLogoutAPIView(APIView):
-    """APIView for user logout."""
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
     http_method_names = ["post"]
 
     @swagger_auto_schema(
-        operation_description="Logout current user by deleting token",
+        operation_description="Logout by blacklisting refresh token",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='Refresh token')
+            },
+            required=['refresh']
+        ),
         responses={
-            200: openapi.Response("Logged out successfully"),
-            400: "Invalid token"
+            205: openapi.Response("Logout successful"),
+            400: "Bad Request"
         }
     )
     def post(self, request):
-        """Handle POST requests to log out a user."""
+        refresh_token = request.data.get("refresh")
+
+        if not refresh_token:
+            return Response({"error": "Refresh token required"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            token = Token.objects.get(user=request.user)
-            token.delete() 
-            return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-        except Token.DoesNotExist:
+            token = RefreshToken(refresh_token)
+            token.blacklist()  
+            return Response({"message": "Logout successful"}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
             return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
