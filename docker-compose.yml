@@ -4,9 +4,17 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
+    depends_on:
+      - redis
     volumes:
       - .:/app
     env_file:
       - ./moviepro/.env
+
+  redis:
+    image: redis
+    container_name: my-redis
+    ports:
+      - "6379:6379"
 
 
