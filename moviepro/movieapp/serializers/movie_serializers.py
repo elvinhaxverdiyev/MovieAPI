@@ -4,11 +4,13 @@ from movieapp.models.movie_models import Movie
 from movieapp.models.interactions_models import MovieLike
 from movieapp.models.actors_models import Actor
 from movieapp.models.category_models import Category
+from movieapp.serializers.image_serializers import ImageSerializer
 
 
 class MovieSerializer(serializers.ModelSerializer):
     like_count = serializers.SerializerMethodField()
-    image = serializers.SerializerMethodField()
+    poster = serializers.SerializerMethodField()
+    extra_images = ImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Movie
@@ -20,16 +22,18 @@ class MovieSerializer(serializers.ModelSerializer):
             "trailer_link",
             "views_count",
             "like_count",
-            "image",
+            "poster",
+            "extra_images",
+            "genres"
         ]
 
-    def get_image(self, obj):
-        if obj.image:
+    def get_poster(self, obj):
+        if obj.poster:
             try:
                 request = self.context["request"]  
-                return request.build_absolute_uri(obj.image.url)
+                return request.build_absolute_uri(obj.poster.url)
             except KeyError: 
-                return obj.image.url
+                return obj.poster.url
         return None
 
 
@@ -53,13 +57,13 @@ class MovieCreateSerializer(serializers.ModelSerializer):
             "actors",
             "genres_display",
             "actors_display",
-            "image",  
+            "poster",  
         ]
     
     def create(self, validated_data):
         genres = validated_data.pop("genres", [])
         actors_list = validated_data.pop("actors", [])
-        image = validated_data.pop("image", None)  
+        image = validated_data.pop("poster", None)  
         movie = Movie.objects.create(**validated_data)
 
         for genre_name in genres:
@@ -70,7 +74,7 @@ class MovieCreateSerializer(serializers.ModelSerializer):
             actor, created = Actor.objects.get_or_create(name=actor_name)
             movie.actors.add(actor)
         if image:
-            movie.image = image
+            movie.poster = image
             movie.save()
 
         return movie

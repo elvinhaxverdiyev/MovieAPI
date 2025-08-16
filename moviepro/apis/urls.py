@@ -4,6 +4,7 @@ from .movie_control import *
 from .interactions_apis import *
 from .genre_apis import *
 from .search_and_filter_apis import *
+from .actors_apis import ActorsAPIView
 
 
 urlpatterns = [
@@ -35,6 +36,11 @@ urlpatterns = [
         'users/',
         UserListAPIView.as_view(),
         name="user-list"
+    ),
+    path(
+        'actors/', 
+        ActorsAPIView.as_view(),
+        name='actors-list'
     ),
     path(
         'movies/',
