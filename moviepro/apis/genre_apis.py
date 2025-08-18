@@ -18,6 +18,8 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 class GenreListAPIView(APIView):
+    http_method_names = ['get']
+    
     def get(self, request):
         categories = cache.get('categories')
         logger.info(f"Cachedən categories: {categories}")
@@ -36,6 +38,7 @@ class GenreListAPIView(APIView):
             
 class MovieByGenreAPIView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
+    http_method_names = ['get']
     
     def get(self, request):
         genre_name = request.query_params.get("genre", None)
