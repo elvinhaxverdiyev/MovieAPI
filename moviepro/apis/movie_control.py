@@ -24,6 +24,7 @@ class MovieListPostAPIView(APIView):
     
     permission_classes = [AllowAny]  
     pagination_class = MoviePagination
+    http_method_names = ['get', 'post']
     
     def get(self, request):
         movies = Movie.objects.all()  
@@ -53,6 +54,7 @@ class MovieListPostAPIView(APIView):
     
 class MovieDetailAPIView(APIView):
     authentication_classes = [TokenAuthentication]  
+    http_method_names = ['get', 'patch', 'delete']
     
     def get_permissions(self):
         if self.request.method == "GET":
