@@ -22,6 +22,7 @@ __all__ = [
 class MovieLikeAPIView(APIView):
     """API that handles liking a movie."""
     permission_classes = [IsAuthenticatedOrReadOnly]
+    http_method_names = ['get', 'post']
     
     def get(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
@@ -55,6 +56,7 @@ class AddCommentAPIView(APIView):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [HeHasPermission]
+    http_method_names = ['get', 'post']
         
     def get(self, request, id):
         movie = get_object_or_404(Movie, pk=id)
@@ -79,6 +81,7 @@ class DeleteCommentAPIView(APIView):
     """API that allows users to delete their own comments."""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, HeHasPermission]
+    http_method_names = ['delete']
         
     def delete(self, request, id):
         comment = get_object_or_404(Comment, pk=id)
