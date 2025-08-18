@@ -15,6 +15,7 @@ __all__ = [
 class MovieSearchAPIView(APIView):
     """API that searches for movies by title."""
     permission_classes = [IsAuthenticatedOrReadOnly]
+    http_method_names = ['get']
     
     def get(self, request):
         query = request.GET.get("q", "")
