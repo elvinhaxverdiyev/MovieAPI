@@ -6,6 +6,30 @@ from .category_models import Category
 
 
 class Movie(models.Model):
+    """
+    Model representing a movie.
+
+    Fields:
+        title (CharField): The title of the movie (max length: 255).
+        description (TextField): A detailed description or synopsis of the movie.
+        poster (ImageField, optional): The main poster image of the movie, stored in 'movies/'.
+        created_by (ForeignKey): The user (admin/creator) who added the movie.
+        genres (ManyToManyField): Categories/genres associated with the movie.
+        actors (ManyToManyField): Actors who played in the movie.
+        trailer_link (URLField, optional): A link to the trailer (e.g., YouTube).
+        likes (ManyToManyField): Users who liked the movie.
+        views_count (PositiveIntegerField): Number of times the movie was viewed.
+        created_at (DateTimeField): Timestamp when the movie record was created.
+
+    Relations:
+        - `created_by` → CustomUser
+        - `genres` → Category (many-to-many)
+        - `actors` → Actor (many-to-many)
+        - `likes` → CustomUser (many-to-many)
+
+    Methods:
+        __str__(): Returns the movie title as its string representation.
+    """
     title = models.CharField(max_length=255)
     description = models.TextField()
     poster = models.ImageField(upload_to="movies/", null=True, blank=True) 
