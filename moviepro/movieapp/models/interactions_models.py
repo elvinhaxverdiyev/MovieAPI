@@ -35,6 +35,21 @@ class MovieLike(models.Model):
 
     
 class Comment(models.Model):
+    """
+    Model representing a comment left by a user on a movie.
+
+    Fields:
+        movie (ForeignKey): The movie on which the comment was made.
+        user (ForeignKey): The user who wrote the comment.
+        text (TextField): The body of the comment.
+        created_at (DateTime): Timestamp when the comment was created.
+
+    Relations:
+        - Accessible from a movie instance via `movie.comments.all()`.
+
+    Methods:
+        __str__(): Returns a string showing which user commented on which movie.
+    """
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     text = models.TextField()
