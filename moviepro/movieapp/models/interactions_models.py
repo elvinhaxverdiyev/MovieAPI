@@ -6,6 +6,22 @@ from .movie_models import Movie
 
 
 class MovieLike(models.Model):
+    """
+    Model representing a "like" given by a user to a movie.
+
+    Fields:
+        user (ForeignKey): The user who liked the movie. 
+            If the user is deleted, related likes are deleted.
+        movie (ForeignKey): The movie that was liked.
+        created_at (DateTime): Timestamp when the like was created.
+
+    Meta:
+        unique_together: Ensures that the same user cannot like 
+        the same movie more than once.
+
+    Methods:
+        __str__(): Returns a readable string showing who liked which movie.
+    """
     user = models.ForeignKey(CustomUser, null=True, on_delete=models.CASCADE)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
