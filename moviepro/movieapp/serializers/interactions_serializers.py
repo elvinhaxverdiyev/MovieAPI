@@ -19,6 +19,13 @@ class CommentSerializer(serializers.ModelSerializer):
         
     
 class MovieLikeSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the MovieLike model.
+
+    This serializer exposes only the username of the user who liked
+    a movie. It maps the `user.username` field to `user_name` for
+    more readable API responses.
+    """
     user_name = serializers.CharField(source="user.username", read_only=True) 
     class Meta:
         model = MovieLike
