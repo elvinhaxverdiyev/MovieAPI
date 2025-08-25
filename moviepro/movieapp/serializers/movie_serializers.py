@@ -8,6 +8,15 @@ from movieapp.serializers.image_serializers import ImageSerializer
 
 
 class MovieSerializer(serializers.ModelSerializer):
+    """
+    Serializer for retrieving movie details.
+
+    - Includes basic fields such as title, description, trailer link, and views count.
+    - Adds calculated fields:
+        * `like_count`: Number of likes for the movie.
+        * `poster`: Full absolute URL of the poster.
+        * `extra_images`: Related images of the movie.
+    """
     like_count = serializers.SerializerMethodField()
     poster = serializers.SerializerMethodField()
     extra_images = ImageSerializer(many=True, read_only=True)
