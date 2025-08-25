@@ -148,6 +148,12 @@ class MovieUpdateSerializer(serializers.ModelSerializer):
         ]
 
     def update(self, instance, validated_data):
+        """
+        Update an existing movie instance.
+
+        - Updates basic fields (title, description, trailer link, views count).
+        - Replaces actors and genres if new lists are provided.
+        """
         instance.title = validated_data.get("title", instance.title)
         instance.description = validated_data.get("description", instance.description)
         instance.trailer_link = validated_data.get("trailer_link", instance.trailer_link)
