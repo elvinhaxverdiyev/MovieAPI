@@ -48,6 +48,7 @@ class MovieSerializer(serializers.ModelSerializer):
 
 
     def get_like_count(self, obj):
+         """Return total number of likes for the movie."""
          return MovieLike.objects.filter(movie=obj).count()
 
 
