@@ -116,6 +116,13 @@ class MovieCreateSerializer(serializers.ModelSerializer):
 
 
 class MovieUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for updating an existing movie.
+
+    - Allows partial update of movie fields such as title, description, trailer link, etc.
+    - Handles updating many-to-many relationships for actors and genres.
+    - Includes read-only likes_count field.
+    """
     likes_count = serializers.IntegerField(read_only=True)
     actors = serializers.PrimaryKeyRelatedField(
         many=True,
