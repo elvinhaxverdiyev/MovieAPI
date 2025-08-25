@@ -111,6 +111,7 @@ class MovieCreateSerializer(serializers.ModelSerializer):
         return [genre.name for genre in obj.genres.all()]
 
     def get_actors_display(self, obj):
+        """Return a list of actor names related to the movie."""
         return [actor.name for actor in obj.actors.all()]
 
 
