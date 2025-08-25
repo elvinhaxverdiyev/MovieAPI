@@ -37,6 +37,7 @@ class MovieSerializer(serializers.ModelSerializer):
         ]
 
     def get_poster(self, obj):
+        """Return absolute URI for the movie poster if available."""
         if obj.poster:
             try:
                 request = self.context["request"]  
