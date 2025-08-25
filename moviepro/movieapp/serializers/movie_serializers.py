@@ -53,6 +53,14 @@ class MovieSerializer(serializers.ModelSerializer):
 
 
 class MovieCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating a new movie.
+
+    - Accepts `genres` and `actors` as lists of names (strings).
+    - Automatically creates `Category` and `Actor` objects if they do not exist.
+    - Handles optional poster image upload.
+    - Provides read-only display fields for genres and actors.
+    """
     genres = serializers.ListField(child=serializers.CharField(), write_only=True)
     actors = serializers.ListField(child=serializers.CharField(), write_only=True)
     genres_display = serializers.SerializerMethodField(read_only=True)
