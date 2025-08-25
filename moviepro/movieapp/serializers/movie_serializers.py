@@ -79,7 +79,15 @@ class MovieCreateSerializer(serializers.ModelSerializer):
             "poster",  
         ]
     
+    
     def create(self, validated_data):
+        """
+        Create a new Movie instance with associated genres and actors.
+
+        - Extracts `genres` and `actors` from input.
+        - Ensures that related Category and Actor objects exist.
+        - Assigns poster image if provided.
+        """
         genres = validated_data.pop("genres", [])
         actors_list = validated_data.pop("actors", [])
         image = validated_data.pop("poster", None)  
