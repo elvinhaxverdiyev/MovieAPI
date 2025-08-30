@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.authentication import TokenAuthentication
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from .pagginations import MoviePagination
 from users.serializers import *
@@ -25,7 +27,10 @@ class MovieListPostAPIView(APIView):
     permission_classes = [AllowAny]  
     pagination_class = MoviePagination
     http_method_names = ['get', 'post']
-    
+    @swagger_auto_schema(
+        operation_description="Get list of movies",
+        responses={200: MovieSerializer(many=True)},
+    )
     def get(self, request):
         movies = Movie.objects.all()  
         pagination = self.pagination_class()  
@@ -33,6 +38,28 @@ class MovieListPostAPIView(APIView):
         serializer = MovieSerializer(result_page, many=True)  
         return pagination.get_paginated_response(serializer.data) 
     
+    @swagger_auto_schema(
+        operation_description="Create a new movie",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["title", "description", "genres", "actors"],
+            properties={
+                "title": openapi.Schema(type=openapi.TYPE_STRING, description="Movie title"),
+                "description": openapi.Schema(type=openapi.TYPE_STRING, description="Movie description"),
+                "genres": openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_STRING),
+                    description="List of genres (names)"
+                ),
+                "actors": openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_STRING),
+                    description="List of actors (names)"
+                ),
+            },
+        ),
+        responses={201: MovieCreateSerializer()},
+    )
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return Response(

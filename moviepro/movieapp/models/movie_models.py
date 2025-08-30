@@ -12,7 +12,6 @@ class Movie(models.Model):
     Fields:
         title (CharField): The title of the movie (max length: 255).
         description (TextField): A detailed description or synopsis of the movie.
-        poster (ImageField, optional): The main poster image of the movie, stored in 'movies/'.
         created_by (ForeignKey): The user (admin/creator) who added the movie.
         genres (ManyToManyField): Categories/genres associated with the movie.
         actors (ManyToManyField): Actors who played in the movie.
@@ -32,7 +31,6 @@ class Movie(models.Model):
     """
     title = models.CharField(max_length=255)
     description = models.TextField()
-    poster = models.ImageField(upload_to="movies/", null=True, blank=True) 
     created_by = models.ForeignKey(
         CustomUser,
         related_name="created_movies",
