@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import *
+from .models import Movie, Category, Actor, MovieLike, Comment, Image
 
 
 # ==== INLINE-lar ====
@@ -32,17 +32,18 @@ class MovieAdmin(admin.ModelAdmin):
     list_filter = ('genres', 'created_at', 'actors')
     search_fields = ('title', 'description', 'actors__name', 'created_by__username')
     ordering = ('-created_at',)
-    inlines = [CommentInline, ImageInline]   # həm Comment, həm də Image inline
+    inlines = [CommentInline, ImageInline]
 
     def actor_count(self, obj):
         return obj.actors.count()
     actor_count.short_description = 'Aktyor Sayı'
 
     def movie_image_preview(self, obj):
-        if obj.image:
+        first_image = obj.extra_images.first()
+        if first_image and first_image.image:
             return format_html(
                 '<img src="{}" style="width: 100px; height: auto; border-radius:5px;" />',
-                obj.image.url
+                first_image.image.url
             )
         return "Şəkil yoxdur"
     movie_image_preview.short_description = 'Film Şəkli'
@@ -62,17 +63,18 @@ class ActorAdmin(admin.ModelAdmin):
     list_display = ('name', 'movies_count', 'actor_image_preview')
     search_fields = ('name',)
     ordering = ('name',)
-    inlines = [ImageInline]  # aktyorun əlavə şəkilləri inline
+    inlines = [ImageInline]
 
     def movies_count(self, obj):
         return obj.movies.count()
     movies_count.short_description = 'Filmlər'
 
     def actor_image_preview(self, obj):
-        if obj.image:
+        first_image = obj.extra_images.first()
+        if first_image and first_image.image:
             return format_html(
                 '<img src="{}" style="width: 80px; height: auto; border-radius:5px;" />',
-                obj.image.url
+                first_image.image.url
             )
         return "Şəkil yoxdur"
     actor_image_preview.short_description = 'Əsas Şəkil'
